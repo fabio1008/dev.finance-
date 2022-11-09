@@ -6,7 +6,7 @@ const Modal = {
             .querySelector('.modal-overlay')
             .classList
             .add('active')
-    },
+        },
     close(){
         // fechar o modal
         // remover a class active no modal
@@ -17,75 +17,61 @@ const Modal = {
     }
 }
 
-const Transaction = {
-    all: [
-    {
-        description: 'Light',
-        amount: -50000,
-        date: '19/11/2021'
+const Storage = {
+    get() {
+        return JSON.parse(localStorage.getItem("dev.finances:transactions")) || []
     },
 
-    {   
-        description: 'Website Creation',
-        amount: 500000,
-        date: '19/11/2021'
-    },
-
-    {
-        description: 'Internet',
-        amount: -20000,
-        date: '19/11/2021'
-    },
-
-    {
-        description: 'App',
-        amount: 2000000,
-        date: '19/11/2021'
-    },
-],
-
-add(transaction){
-    Transaction.all.push(transaction)
-    App.reload()
-
-},
-
-remove(index) {
-    Transaction.all.splice(index, 1)
-    App.reload()
-},
-
-incomes() {
-    let income = 0;
-    // collect all transactions
-    //for each transaction
-    Transaction.all.forEach(transaction => {
-        //if it is > 0
-        if(transaction.amount > 0) {
-            //add to a variable and return the variable
-            income = income + transaction.amount;
-        }
-    })
-    return income; //some the incomes
-},
-
-expenses() {
-    let expense = 0;
-    // collect all transactions
-    //for each transaction
-    Transaction.all.forEach(transaction => {
-        //if it is > 0
-        if(transaction.amount < 0) {
-            //add to a variable and return the variable
-            expense = expense + transaction.amount;
-        }
-    })
-    return expense;
-},
-
-total () {
-        return Transaction.incomes() + Transaction.expenses();
+    set(transactions) {
+        localStorage.setItem("dev.finances:transactions", JSON.stringify(transactions))
 }
+}
+
+const Transaction = {
+    all: Storage.get(),
+
+    add(transaction) {
+        Transaction.all.push(transaction)
+
+        App.reload()
+    },
+    
+    remove(index) {
+        Transaction.all.splice(index, 1)
+        App.reload()
+    },
+
+    incomes() {
+        let income = 0;
+        // collect all transactions
+        //for each transaction
+        Transaction.all.forEach(transaction => {
+            //if it is > 0
+            if(transaction.amount > 0) {
+                //add to a variable and return the variable
+                income = income + transaction.amount;
+            }
+        })
+        return income; //some the incomes
+    },
+
+    expenses() {
+        let expense = 0;
+        // collect all transactions
+        //for each transaction
+        Transaction.all.forEach(transaction => {
+            //if it is > 0
+            if(transaction.amount < 0) {
+                //add to a variable and return the variable
+                expense = expense + transaction.amount;
+            }
+        })
+        return expense;
+    },
+
+    total () {
+            return Transaction.incomes() + Transaction.expenses();
+    }
 }
 
 // I need to replace my datas in my object here at javascript and add on HTML.
@@ -215,11 +201,11 @@ const Form = {
 
 const App = {
     init() {
-        Transaction.all.forEach((transaction, index) => {
-            DOM.addTransaction(transaction, index)
-        })
-        
+        Transaction.all.forEach(DOM.addTransaction)
+                
         DOM.updateBalance()
+
+        Storage.set(Transaction.all)
     },
 
     reload() {
@@ -227,5 +213,6 @@ const App = {
         App.init()
     },
 }
+
 
 App.init()
